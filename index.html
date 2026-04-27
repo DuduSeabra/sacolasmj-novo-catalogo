@@ -1758,7 +1758,16 @@
 
   // ========== INIT ==========
   setFilterCounts();
-  renderProducts('all');
+
+  fetch('/prices.json')
+    .then(r => r.ok ? r.json() : null)
+    .then(prices => {
+      if (prices) {
+        PRODUCTS.forEach(p => { if (prices[p.id]) p.priceTable = prices[p.id]; });
+      }
+    })
+    .catch(() => {})
+    .finally(() => { renderProducts('all'); });
 
   document.querySelectorAll('.nav-links a').forEach(a=>{
     a.addEventListener('click', ()=>document.getElementById('nav').classList.remove('mobile-open'));

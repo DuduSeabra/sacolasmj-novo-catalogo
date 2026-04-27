@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Sacolas MJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-sky:#B3D4E9;
+  --blue-med:#2581C2;
+  --blue-deep:#28235A;
+  --blue-deep-2:#1B1940;
+  --white:#FFFFFF;
+  --off:#FAFBFD;
+  --cream:#F5F7FA;
+  --line:#E3EAF2;
+  --ink:#14163A;
+  --ink-soft:#3C4365;
+  --muted:#7A819C;
+  --wa:#25D366;
+  --wa-dark:#128C7E;
+  --red:#D93535;
+  --red-bg:#FFF0F0;
+  --green:#1A8F4E;
+  --green-bg:#F0FFF6;
+  --sans:"Inter",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --radius:12px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans);font-size:15px;line-height:1.55;
+  color:var(--ink);background:var(--cream);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Header ── */
+.header{
+  background:var(--blue-deep);color:#fff;
+  padding:0 24px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.18);
+}
+.header-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:16px;font-weight:600;letter-spacing:-.01em;
+}
+.header-title svg{opacity:.7}
+.header-actions{display:flex;align-items:center;gap:12px}
+.btn-ghost{
+  background:none;border:1.5px solid rgba(255,255,255,.3);color:#fff;
+  padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s;font-family:var(--sans);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+
+/* ── Layout ── */
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 120px}
+
+/* ── Setup screen ── */
+#setup{
+  max-width:480px;margin:64px auto;
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--line);padding:36px 32px;
+  box-shadow:0 4px 24px rgba(40,35,90,.07);
+}
+#setup h2{
+  margin:0 0 6px;font-size:22px;font-weight:700;color:var(--blue-deep);
+}
+#setup p{margin:0 0 24px;color:var(--muted);font-size:14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.field input{
+  padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;
+  font-size:14px;font-family:var(--sans);color:var(--ink);
+  background:var(--white);transition:border-color .15s;outline:none;
+}
+.field input:focus{border-color:var(--blue-med)}
+.field small{font-size:12px;color:var(--muted);line-height:1.4}
+.btn-primary{
+  width:100%;padding:12px;background:var(--blue-med);color:#fff;
+  border:none;border-radius:8px;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:var(--sans);transition:background .15s;margin-top:4px;
+}
+.btn-primary:hover{background:var(--blue-deep)}
+.btn-primary:disabled{background:var(--muted);cursor:not-allowed}
+
+/* ── Alert ── */
+.alert{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px;border-radius:8px;font-size:13px;
+  margin-bottom:20px;line-height:1.45;
+}
+.alert-warn{background:#FFF8E6;color:#7A5800;border:1px solid #FFE4A0}
+.alert-info{background:var(--cream);color:var(--ink-soft);border:1px solid var(--line)}
+
+/* ── Product cards ── */
+.product-card{
+  background:var(--white);border:1px solid var(--line);
+  border-radius:var(--radius);margin-bottom:16px;
+  box-shadow:0 1px 4px rgba(40,35,90,.04);
+  overflow:hidden;
+}
+.product-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;cursor:pointer;user-select:none;
+  border-bottom:1px solid transparent;transition:border-color .15s;
+}
+.product-header:hover{background:var(--off)}
+.product-header.open{border-bottom-color:var(--line)}
+.product-name{font-weight:600;font-size:15px;color:var(--blue-deep)}
+.product-id{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.chevron{
+  transition:transform .2s;color:var(--muted);flex-shrink:0;
+}
+.product-header.open .chevron{transform:rotate(180deg)}
+.product-body{display:none;padding:18px}
+.product-header.open + .product-body{display:block}
+
+/* ── Price table editor ── */
+.price-table-editor{width:100%;border-collapse:collapse;font-size:14px}
+.price-table-editor th{
+  text-align:left;padding:8px 10px;
+  font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--muted);border-bottom:2px solid var(--line);white-space:nowrap;
+}
+.price-table-editor th.col-qty{color:var(--ink-soft)}
+.price-table-editor td{padding:6px 6px 6px 10px;border-bottom:1px solid var(--line)}
+.price-table-editor tr:last-child td{border-bottom:none}
+.qty-cell{
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  color:var(--ink-soft);white-space:nowrap;padding-right:16px;
+}
+.price-input{
+  width:80px;padding:7px 8px;
+  border:1.5px solid var(--line);border-radius:6px;
+  font-size:14px;font-family:var(--mono);font-weight:500;
+  color:var(--blue-deep);text-align:right;
+  background:var(--off);outline:none;transition:border-color .15s,background .15s;
+}
+.price-input:focus{border-color:var(--blue-med);background:var(--white)}
+.price-input.changed{border-color:var(--wa-dark);background:#F0FFF6}
+.prefix{font-size:13px;color:var(--muted);padding-right:4px}
+
+/* ── Sticky save bar ── */
+.save-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--line);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  box-shadow:0 -4px 20px rgba(40,35,90,.08);z-index:90;
+}
+.save-btn{
+  padding:11px 28px;background:var(--blue-med);color:#fff;
+  border:none;border-radius:8px;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:var(--sans);transition:all .15s;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.save-btn:hover:not(:disabled){background:var(--blue-deep)}
+.save-btn:disabled{background:var(--muted);cursor:not-allowed}
+.status{font-size:14px;color:var(--muted)}
+.status.ok{color:var(--green)}
+.status.err{color:var(--red)}
+.status.loading{color:var(--blue-med)}
+
+/* ── Spinner ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+.save-btn.loading .spinner{display:block}
+.save-btn.loading .btn-label{display:none}
+
+/* ── Section heading ── */
+.section-head{
+  font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:28px 0 12px;padding-bottom:8px;border-bottom:1.5px solid var(--line);
+}
+
+@media(max-width:600px){
+  .wrap{padding:20px 12px 120px}
+  #setup{margin:32px 12px;padding:24px 20px}
+  .save-bar{flex-direction:column-reverse;gap:10px;padding:12px 16px}
+  .save-btn{width:100%;justify-content:center}
+  .price-input{width:68px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    Sacolas MJ · Admin de Preços
+  </div>
+  <div class="header-actions">
+    <button class="btn-ghost" onclick="resetConfig()">Trocar configuração</button>
+  </div>
+</div>
+
+<!-- Setup screen -->
+<div id="setup">
+  <h2>Configurar acesso</h2>
+  <p>Informe suas credenciais do GitHub para poder salvar alterações de preço diretamente no repositório.</p>
+
+  <div class="alert alert-warn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>O token fica salvo <strong>somente neste navegador</strong> (localStorage). Nunca compartilhe esta página logada.</span>
+  </div>
+
+  <div class="field">
+    <label>GitHub Personal Access Token</label>
+    <input id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    <small>Crie em GitHub → Settings → Developer settings → Personal access tokens (Classic). Escopo necessário: <strong>repo</strong> (ou apenas <strong>contents:write</strong>).</small>
+  </div>
+  <div class="field">
+    <label>Owner do repositório</label>
+    <input id="cfg-owner" type="text" placeholder="ex: duduseabra99" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>Nome do repositório</label>
+    <input id="cfg-repo" type="text" placeholder="ex: sacolasmj-novo-catalogo" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>Branch</label>
+    <input id="cfg-branch" type="text" placeholder="main" value="main" autocomplete="off">
+  </div>
+  <button class="btn-primary" onclick="saveConfig()">Salvar e continuar</button>
+  <div id="cfg-error" style="margin-top:12px;font-size:13px;color:var(--red);display:none"></div>
+</div>
+
+<!-- Main admin app -->
+<div id="app" hidden>
+  <div class="wrap">
+    <div class="alert alert-info" style="margin-bottom:24px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>Edite os preços abaixo e clique em <strong>Salvar alterações</strong>. O site atualiza automaticamente em ~30 segundos após o commit.</span>
+    </div>
+    <div id="product-list"></div>
+  </div>
+  <div class="save-bar">
+    <div class="status" id="save-status"></div>
+    <button class="save-btn" id="save-btn" onclick="saveAll()">
+      <div class="spinner"></div>
+      <span class="btn-label">Salvar alterações</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── Product metadata (id, name, variants) ──────────────────────────────────
+const PRODUCTS_META = [
+  {id:'kraft-cordinha',    name:'Kraft · alça cordinha',        cat:'Kraft',
+   variants:[{key:'PP',label:'PP'},{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'kraft-gorgurao',    name:'Kraft · alça gorgurão',        cat:'Kraft',
+   variants:[{key:'PP',label:'PP'},{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'kraft-promocional', name:'Kraft promocional',            cat:'Kraft',
+   variants:[{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'semijoias-cordinha',name:'Sacola semijoias · cordinha',  cat:'Papel branco',
+   variants:[{key:'U',label:'Único'}]},
+  {id:'semijoias-gorgurao',name:'Sacola semijoias · gorgurão',  cat:'Papel branco',
+   variants:[{key:'U',label:'Único'}]},
+  {id:'branca-gorgurao',   name:'Branca · alça gorgurão',       cat:'Papel branco',
+   variants:[{key:'PP',label:'PP'},{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'branca-promocional',name:'Branca promocional',           cat:'Papel branco',
+   variants:[{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'duplex-cordinha',   name:'Duplex · alça cordinha',       cat:'Papel branco',
+   variants:[{key:'PP',label:'PP'},{key:'P',label:'P'},{key:'M',label:'M'},{key:'G',label:'G'}]},
+  {id:'plastico-cadeado',  name:'Plástica · alça cadeado',      cat:'Plástico',
+   variants:[{key:'A',label:'30×55cm'},{key:'B',label:'40×60cm'}]},
+  {id:'plastico-camiseta', name:'Plástica · alça camiseta',     cat:'Plástico',
+   variants:[
+     {key:'A',label:'45×50 · 0,07'},{key:'B',label:'45×60 · 0,07'},{key:'C',label:'60×75 · 0,07'},
+     {key:'D',label:'45×50 · 0,10'},{key:'E',label:'45×60 · 0,10'},{key:'F',label:'60×75 · 0,10'},
+   ]},
+  {id:'boca-palhaco',      name:'Boca de palhaço',              cat:'Plástico',
+   variants:[
+     {key:'A',label:'15×20 · 0,07'},{key:'B',label:'20×30 · 0,07'},{key:'C',label:'25×30 · 0,07'},
+     {key:'D',label:'30×40 · 0,07'},{key:'E',label:'40×50 · 0,07'},
+     {key:'F',label:'15×20 · 0,12'},{key:'G',label:'20×30 · 0,12'},{key:'H',label:'25×30 · 0,12'},
+     {key:'I',label:'30×40 · 0,12'},{key:'J',label:'40×50 · 0,12'},
+   ]},
+  {id:'cristal-palhaco',   name:'Cristal · boca de palhaço',   cat:'Plástico',
+   variants:[{key:'A',label:'15×20'},{key:'B',label:'20×30'},{key:'C',label:'25×30'},{key:'D',label:'30×40'},{key:'E',label:'40×50'}]},
+  {id:'tnt-ecobag',        name:'Ecobag TNT',                   cat:'TNT · Ecobag',
+   variants:[{key:'A',label:'27×35cm'},{key:'B',label:'34×40cm'},{key:'C',label:'43×40cm'}]},
+  {id:'saco-tnt',          name:'Saco de TNT',                  cat:'TNT · Ecobag',
+   variants:[{key:'A',label:'19×30cm'},{key:'B',label:'27×37cm'},{key:'C',label:'34×40cm'}]},
+  {id:'envio',             name:'Saco de envio',                cat:'Envio',
+   variants:[{key:'A',label:'30×42cm'},{key:'B',label:'40×50cm'}]},
+];
+
+const CATS = [...new Set(PRODUCTS_META.map(p=>p.cat))];
+
+// ── Config ─────────────────────────────────────────────────────────────────
+const CFG_KEY = 'mj_admin_cfg';
+let cfg = null;
+
+function loadConfig(){
+  try{ cfg = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ cfg = null; }
+  return cfg && cfg.token && cfg.owner && cfg.repo && cfg.branch;
+}
+
+function saveConfig(){
+  const token  = document.getElementById('cfg-token').value.trim();
+  const owner  = document.getElementById('cfg-owner').value.trim();
+  const repo   = document.getElementById('cfg-repo').value.trim();
+  const branch = document.getElementById('cfg-branch').value.trim() || 'main';
+  const errEl  = document.getElementById('cfg-error');
+
+  if(!token || !owner || !repo){
+    errEl.textContent = 'Preencha todos os campos obrigatórios.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  cfg = {token, owner, repo, branch};
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+  initApp();
+}
+
+function resetConfig(){
+  if(!confirm('Remover configuração salva e sair?')) return;
+  localStorage.removeItem(CFG_KEY);
+  cfg = null;
+  document.getElementById('setup').style.display = 'block';
+  document.getElementById('app').hidden = true;
+}
+
+// ── GitHub API ─────────────────────────────────────────────────────────────
+async function ghFetch(path, options={}){
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers:{
+      'Authorization': `token ${cfg.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      ...(options.headers||{}),
+    },
+  });
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+async function fetchPrices(){
+  const data = await ghFetch(`prices.json?ref=${cfg.branch}`);
+  const content = atob(data.content.replace(/\s/g,''));
+  return { prices: JSON.parse(content), sha: data.sha };
+}
+
+async function commitPrices(prices, sha){
+  const content = btoa(unescape(encodeURIComponent(
+    JSON.stringify(prices, null, 2) + '\n'
+  )));
+  await ghFetch('prices.json', {
+    method:'PUT',
+    body: JSON.stringify({
+      message: 'Atualiza tabela de preços via admin',
+      content,
+      sha,
+      branch: cfg.branch,
+    }),
+  });
+}
+
+// ── Current state ──────────────────────────────────────────────────────────
+let currentPrices = null;
+let currentSha    = null;
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderApp(prices){
+  const list = document.getElementById('product-list');
+  let html = '';
+  let lastCat = null;
+
+  PRODUCTS_META.forEach(meta => {
+    if(meta.cat !== lastCat){
+      html += `<div class="section-head">${meta.cat}</div>`;
+      lastCat = meta.cat;
+    }
+    const table = prices[meta.id] || [];
+    const keys  = meta.variants.map(v=>v.key);
+
+    const thCols = meta.variants.map(v=>
+      `<th style="text-align:right">${escH(v.label)}</th>`
+    ).join('');
+
+    const rows = table.map((row,ri)=>{
+      const tds = keys.map(k=>{
+        const val = (row.prices[k] ?? '');
+        return `<td><span class="prefix">R$</span><input class="price-input" type="text"
+          data-id="${escH(meta.id)}" data-row="${ri}" data-key="${escH(k)}"
+          value="${escH(val)}" inputmode="decimal" placeholder="0,00"
+          oninput="onPriceInput(this)" onblur="onPriceBlur(this)"></td>`;
+      }).join('');
+      return `<tr><td class="qty-cell">${row.qty} un</td>${tds}</tr>`;
+    }).join('');
+
+    html += `
+    <div class="product-card" id="card-${escH(meta.id)}">
+      <div class="product-header" onclick="toggleCard(this)">
+        <div>
+          <div class="product-name">${escH(meta.name)}</div>
+          <div class="product-id">${escH(meta.id)}</div>
+        </div>
+        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="product-body">
+        <table class="price-table-editor">
+          <thead><tr><th class="col-qty">Quantidade</th>${thCols}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+function toggleCard(header){
+  header.classList.toggle('open');
+}
+
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Input handling ─────────────────────────────────────────────────────────
+function onPriceInput(el){
+  el.classList.add('changed');
+}
+
+function onPriceBlur(el){
+  // Normalize: accept "3.53" → "3,53", strip non-numeric except comma/dot
+  let v = el.value.replace(/[^\d.,]/g,'').replace('.',',');
+  // Ensure format X,XX
+  const m = v.match(/^(\d+)(?:[,.](\d{0,2}))?$/);
+  if(m) v = m[1] + ',' + (m[2]||'00').padEnd(2,'0');
+  el.value = v;
+}
+
+// ── Collect all prices from inputs ─────────────────────────────────────────
+function collectPrices(){
+  const prices = JSON.parse(JSON.stringify(currentPrices));
+  document.querySelectorAll('.price-input').forEach(el=>{
+    const id  = el.dataset.id;
+    const ri  = parseInt(el.dataset.row);
+    const key = el.dataset.key;
+    const val = el.value.trim();
+    if(prices[id] && prices[id][ri]){
+      prices[id][ri].prices[key] = val;
+    }
+  });
+  return prices;
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────
+async function saveAll(){
+  const btn    = document.getElementById('save-btn');
+  const status = document.getElementById('save-status');
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  status.textContent = 'Salvando...';
+  status.className   = 'status loading';
+
+  try {
+    // Re-fetch SHA to avoid conflict if page was open a long time
+    const { sha } = await ghFetch(`prices.json?ref=${cfg.branch}`);
+    currentSha = sha;
+
+    const newPrices = collectPrices();
+    await commitPrices(newPrices, currentSha);
+
+    currentPrices = newPrices;
+    document.querySelectorAll('.price-input.changed').forEach(el=>el.classList.remove('changed'));
+
+    status.textContent = '✓ Salvo! O site atualiza em ~30 segundos.';
+    status.className   = 'status ok';
+    setTimeout(()=>{ status.textContent=''; status.className='status'; }, 8000);
+  } catch(e) {
+    status.textContent = '✗ Erro: ' + e.message;
+    status.className   = 'status err';
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function initApp(){
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').hidden = false;
+
+  const list   = document.getElementById('product-list');
+  const status = document.getElementById('save-status');
+
+  list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:40px 0">Carregando preços...</p>';
+  status.textContent = '';
+
+  try {
+    const result = await fetchPrices();
+    currentPrices = result.prices;
+    currentSha    = result.sha;
+    renderApp(currentPrices);
+  } catch(e) {
+    list.innerHTML = `<div class="alert" style="background:var(--red-bg);color:var(--red);border:1px solid #F5C0C0;margin:0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <span>Erro ao carregar preços: <strong>${escH(e.message)}</strong><br>Verifique o token e o nome do repositório.</span>
+    </div>`;
+  }
+}
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────
+if(loadConfig()){
+  initApp();
+} else {
+  // Pre-fill setup form with any partial saved data
+  const saved = (() => { try{ return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }catch(e){ return {}; } })();
+  if(saved.owner) document.getElementById('cfg-owner').value = saved.owner;
+  if(saved.repo)  document.getElementById('cfg-repo').value  = saved.repo;
+  if(saved.branch)document.getElementById('cfg-branch').value= saved.branch;
+}
+</script>
+</body>
+</html>
